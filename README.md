@@ -127,6 +127,7 @@ If credentials are missing the tests skip with a clear message.
 * **Audio devices missing**: Ensure PortAudio is installed (see prerequisites) and run `python -m sounddevice` inside your virtualenv to confirm the runtime can enumerate devices.
 * **429 / rate limits**: The tests and pipeline perform real API calls; adjust usage or upgrade account tiers if needed.
 * **High latency**: Tune Flux EOT thresholds via `runtime/params_inbox.ndjson` to improve responsiveness.
+* **SSL CERTIFICATE_VERIFY_FAILED**: (error on Mac) try running `/Applications/Python\ 3.x/Install\ Certificates.command` and replace the version number with your current one
 
 ## License
 
