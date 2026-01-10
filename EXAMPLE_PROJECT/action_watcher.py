@@ -8,46 +8,30 @@ import subprocess
 import time
 from pathlib import Path
 
-from projects.utils import ACTIONS_FILE, INBOX_FILE, append_inbox_line, ensure_runtime_files, set_system_prompt, tail_line
-from .boot import LOCKED_PROMPT as DEFAULT_LOCKED_PROMPT, UNLOCKED_PROMPT as DEFAULT_UNLOCKED_PROMPT
+from projects.utils import (
+    ACTIONS_FILE,
+    INBOX_FILE,
+    append_inbox_line,
+    ensure_runtime_files,
+    set_system_prompt,
+    tail_line,
+)
+from .boot import (
+    NARRATOR_PROMPT_NOT_DETECTED as DEFAULT_LOCKED_PROMPT,
+    NARRATOR_PROMPT_DETECTED as DEFAULT_UNLOCKED_PROMPT,
+)
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
-# Simple audio cues so we can hear when the door locks or unlocks.
-OPEN_SOUND = ASSETS_DIR / "opening-door-411632.mp3"
-CLOSE_SOUND = ASSETS_DIR / "close-door-382723.mp3"
-
-
-def play_sound(sound_path: Path) -> None:
-    """Fire-and-forget playback using whichever CLI player is available."""
-    if not sound_path.exists():
-        print(f"Sound not found: {sound_path}")
-        return
-
-    command = None
-    if shutil.which("afplay"):
-        command = ["afplay", str(sound_path)]
-    elif shutil.which("ffplay"):
-        command = ["ffplay", "-nodisp", "-autoexit", str(sound_path)]
-    elif shutil.which("play"):
-        command = ["play", str(sound_path)]
-
-    if not command:
-        print("No supported audio player found; skipping sound playback.")
-        return
-
-    try:
-        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception as exc:
-        print(f"Failed to play sound {sound_path}: {exc}")
 
 
 def main() -> None:
     # Ensure the shared files exist before we try to read from them.
     ensure_runtime_files()
     print("Starting action watcher...")
-    with ACTIONS_FILE.open("r", encoding="utf-8") as actions, INBOX_FILE.open(
-        "r", encoding="utf-8"
-    ) as inbox:
+    with (
+        ACTIONS_FILE.open("r", encoding="utf-8") as actions,
+        INBOX_FILE.open("r", encoding="utf-8") as inbox,
+    ):
         # Jump to the end so we only process new lines that arrive after startup.
         actions.seek(0, os.SEEK_END)
         inbox.seek(0, os.SEEK_END)
@@ -69,24 +53,25 @@ def main() -> None:
 
         try:
             while True:
-                # Grab the newest action written by the main app, if any.
                 action_line = tail_line(actions)
                 if action_line:
-                    if action_line == "UNLOCK":
-                        print("UNLOCK found")
+                    if action_line == "DETECTED":
+                        print("robot appeared")
                         locked = False
                         # Swap the assistant's persona and tell listeners what happened.
                         set_system_prompt(unlocked_prompt)
-                        append_inbox_line("A: [The door unlocked, the personality of the door changed drastically, see current system message]")
-                        play_sound(OPEN_SOUND)
+                        append_inbox_line(
+                            "A: [The robot appeared in the frame, the speech of the museum guide changed, see current system message]"
+                        )
                         continue
-                    if action_line == "LOCK":
-                        print("LOCK found")
+                    if action_line == "NOT DETECTED":
+                        print("robot disappeared")
                         locked = True
                         # Restore the locked persona and log the change for the user.
                         set_system_prompt(locked_prompt)
-                        append_inbox_line("A: [The door locked, the personality of the door changed drastically, see current system message]")
-                        play_sound(CLOSE_SOUND)
+                        append_inbox_line(
+                            "A: [The robot has not appeared in the frame, the speech of the museum guide changed, see current system message]"
+                        )
                         continue
 
                 time.sleep(0.2)
@@ -95,6 +80,7 @@ def main() -> None:
         except Exception as e:
             print(f"Action watcher stopped by Exception: {e}")
             import traceback
+
             traceback.print_exc()
             time.sleep(10)
 

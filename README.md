@@ -32,7 +32,7 @@ Follow these steps to run the door project end-to-end:
    python -m venv .venv # make sure to use python3.10+ (use python -V to check)
    # if you get "command not found: python" type python3 instead of python
    source .venv/bin/activate # for Mac or Linux
-   # .venv\Scripts\activate # for Windows
+   .venv\Scripts\activate # for Windows
    python -m pip install --upgrade pip 
    pip install -e .
    ```
