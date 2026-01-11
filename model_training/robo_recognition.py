@@ -10,10 +10,28 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 from model_training.utils import visualize
-from projects import append_action, append_inbox_line
+from projects import append_action, append_inbox_line, set_system_prompt
+
+from EXAMPLE_PROJECT.boot import (
+    NARRATOR_PROMPT_NOT_DETECTED as DEFAULT_LOCKED_PROMPT,
+    NARRATOR_PROMPT_DETECTED as DEFAULT_UNLOCKED_PROMPT,
+)
 
 detection_threshold = 10
 detection_counter = {"count": 0}
+
+robot = {"detected": False}
+
+locked_prompt = (
+    os.getenv("EXAMPLE_PROJECT_LOCKED_PROMPT")
+    or os.getenv("LOCKED_PROMPT")
+    or DEFAULT_LOCKED_PROMPT
+)
+unlocked_prompt = (
+    os.getenv("EXAMPLE_PROJECT_UNLOCKED_PROMPT")
+    or os.getenv("UNLOCKED_PROMPT")
+    or DEFAULT_UNLOCKED_PROMPT
+)
 
 
 def run(model: str, camera_id: int, width: int, height: int) -> None:
@@ -59,8 +77,13 @@ def run(model: str, camera_id: int, width: int, height: int) -> None:
 
         detection_result_list.append(result)
 
-        if detection_counter["count"] >= detection_threshold:
-            append_action(tag="DETECTED")
+        if detection_counter["count"] >= detection_threshold and not robot["detected"]:
+            robot["detected"] = True
+            # append_action(tag="DETECTED")
+            set_system_prompt(unlocked_prompt)
+            append_inbox_line(
+                text="P: [The plush robot toy has appeared in the frame.]"
+            )
 
     # Initialize the object detection model
     base_options = python.BaseOptions(model_asset_path=model)

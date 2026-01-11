@@ -22,7 +22,7 @@ from projects.utils import (
 # Persona scripts that define how the door behaves in each state.
 NARRATOR_PROMPT_NOT_DETECTED = "You are an impersonal third-person narrator, a museum guide, with a posh accent, waiting for the robo plush to come into your view. \
     Talk briefly about the robo plush toy, create some sort of tension, anticipation, for the participants, but don't tell everything there is to know about the robo plush toy. \
-    The robot plush toy is an interactive plush installation. Don't stop talking until the robo plush has appeared in the frame."
+    The robot plush toy is an interactive plush installation."
 
 NARRATOR_PROMPT_DETECTED = "You are still an impersonal third-person narrator, a museum guide, with a posh accent. The famous robo plush is now in front of you. \
     Say 'AHA!' before you start speaking for the first time.\
@@ -31,16 +31,13 @@ NARRATOR_PROMPT_DETECTED = "You are still an impersonal third-person narrator, a
 
 
 # the prompt will be added based on the incoming emotion
-NARRATOR_FEELING = "You are still an impersonal third-person narrator, a museum guide, with a posh accent. The famous robot plush was shaken too agresively, scold the person who did that.\
-    Output <DONE>."
+NARRATOR_FEELING = "You are still an impersonal third-person narrator, a museum guide, with a posh accent. "
 
 # Shared reminder appended to both prompts so the voice stays TTS-friendly.
 PROMPT_APPEND = "Only output text to be synthesized by a TTS system, no '*' around words or emojis for example"
 
 NARRATOR_PROMPT_NOT_DETECTED = NARRATOR_PROMPT_NOT_DETECTED + "\n\n" + PROMPT_APPEND
 NARRATOR_PROMPT_DETECTED = NARRATOR_PROMPT_DETECTED + "\n\n" + PROMPT_APPEND
-NARRATOR_FEELING = NARRATOR_FEELING + "\n\n" + PROMPT_APPEND
-
 
 # Default runtime settings; tweak these to match your hardware and providers.
 RUNTIME_CONFIG = {
@@ -91,7 +88,7 @@ def main() -> None:
             env=prompt_env,
             title="Action Watcher",
         ),
-        # launch_module("EXAMPLE_PROJECT.write_to_serial"),
+        launch_module("EXAMPLE_PROJECT.read_from_serial"),
         launch_module("model_training.robo_recognition"),
     ]
 
