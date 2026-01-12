@@ -9,7 +9,7 @@ This project is an extension of Robo plush toy. I have added a llm-narrator acti
   * macOS: `brew install portaudio`
   * Ubuntu/Debian: `sudo apt install portaudio19-dev`
   * Windows: the bundled `sounddevice` wheel ships PortAudio automatically. However, Windows users need to install [ffmpeg](https://phoenixnap.com/kb/ffmpeg-windows) for audio playback.
-
+* Clone/download [Interactive Robot](https://github.com/MaraxD/interactive-robot/tree/llm-narrator) and follow the instructions before starting (if you only want to speak with the llm-actor, skip this step and the model training one)
 
 ## MediaPipe custom model training & object detection 
 For this idea i wanted to have my own custom data set in order for the robot to be detected by a camera. For this i took 130 pictures of my plush robot (some of them were mirrored), and labeled them using [Label Studio](https://labelstud.io/guide/install). I then exported everything as **Pascal VOC XML**.
