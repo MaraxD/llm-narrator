@@ -16,6 +16,7 @@ from EXAMPLE_PROJECT.boot import (
     NARRATOR_PROMPT_NOT_DETECTED as DEFAULT_LOCKED_PROMPT,
     NARRATOR_PROMPT_DETECTED as DEFAULT_UNLOCKED_PROMPT,
 )
+from projects.utils import append_detection
 
 detection_threshold = 10
 detection_counter = {"count": 0}
@@ -79,7 +80,7 @@ def run(model: str, camera_id: int, width: int, height: int) -> None:
 
         if detection_counter["count"] >= detection_threshold and not robot["detected"]:
             robot["detected"] = True
-            # append_action(tag="DETECTED")
+            append_detection(text="DETECTED")
             set_system_prompt(unlocked_prompt)
             append_inbox_line(
                 text="P: [The plush robot toy has appeared in the frame.]"
@@ -182,6 +183,7 @@ def main():
     )
     args = parser.parse_args()
 
+    append_detection(text="NOT DETECTED")
     append_inbox_line(text="P: [The plush robot toy has not appeared in the frame.]")
 
     run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight)

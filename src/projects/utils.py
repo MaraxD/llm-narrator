@@ -18,6 +18,7 @@ SRC_ROOT = REPO_ROOT / "src"
 RUNTIME_ROOT = REPO_ROOT / "runtime"
 ACTIONS_FILE = RUNTIME_ROOT / "actions.txt"
 INBOX_FILE = RUNTIME_ROOT / "inbox.txt"
+DETECT_FILE = RUNTIME_ROOT / "detected.txt"
 PARAMS_FILE = RUNTIME_ROOT / "params_inbox.ndjson"
 CONVERSATIONS_DIR = RUNTIME_ROOT / "conversations"
 
@@ -39,13 +40,17 @@ class ProjectConfig:
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any]) -> "ProjectConfig":
         runtime_overrides = {
-            section: dict(values) for section, values in data.get("runtime", {}).items() if isinstance(values, Mapping)
+            section: dict(values)
+            for section, values in data.get("runtime", {}).items()
+            if isinstance(values, Mapping)
         }
         metadata = {key: value for key, value in data.items() if key != "runtime"}
         return cls(runtime_overrides=runtime_overrides, metadata=dict(metadata))
 
 
-def load_project_config(project_dir: Path, filename: str = _DEFAULT_CONFIG_FILENAME) -> ProjectConfig:
+def load_project_config(
+    project_dir: Path, filename: str = _DEFAULT_CONFIG_FILENAME
+) -> ProjectConfig:
     """Load ``project_config.json`` from ``project_dir``."""
     config_path = project_dir / filename
     if not config_path.exists():
@@ -86,13 +91,17 @@ def reset_runtime_state(*, clear_conversations: bool = False) -> None:
                 entry.unlink(missing_ok=True)
 
 
-def _filtered_section(section_values: Mapping[str, Any], valid_keys: Mapping[str, Any]) -> Dict[str, Any]:
+def _filtered_section(
+    section_values: Mapping[str, Any], valid_keys: Mapping[str, Any]
+) -> Dict[str, Any]:
     """Return only keys present on the runtime config dataclass section."""
     allowed = set(valid_keys.__dict__.keys())
     return {key: value for key, value in section_values.items() if key in allowed}
 
 
-def apply_runtime_config_overrides(overrides: Mapping[str, Mapping[str, Any]], config_path: Path = CONFIG_FILE) -> None:
+def apply_runtime_config_overrides(
+    overrides: Mapping[str, Mapping[str, Any]], config_path: Path = CONFIG_FILE
+) -> None:
     """Apply project-provided overrides to the runtime config file."""
     if not config_path.is_absolute():
         config_path = (REPO_ROOT / config_path).resolve()
@@ -102,7 +111,9 @@ def apply_runtime_config_overrides(overrides: Mapping[str, Mapping[str, Any]], c
     stt_updates = _filtered_section(overrides.get("stt", {}), current.stt)
     llm_updates = _filtered_section(overrides.get("llm", {}), current.llm)
     tts_updates = _filtered_section(overrides.get("tts", {}), current.tts)
-    manager.apply_updates(audio=audio_updates, stt=stt_updates, llm=llm_updates, tts=tts_updates)
+    manager.apply_updates(
+        audio=audio_updates, stt=stt_updates, llm=llm_updates, tts=tts_updates
+    )
 
 
 def append_json_line(path: Path, payload: Mapping[str, Any]) -> None:
@@ -120,8 +131,20 @@ def append_inbox_line(text: str) -> None:
 
 def append_action(tag: str) -> None:
     ACTIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with ACTIONS_FILE.open("a", encoding="utf-8") as handle:
-        handle.write(f"{tag}\n")
+    with ACTIONS_FILE.open("r+", encoding="utf-8") as handle:
+        file_lines = handle.readlines()
+        if tag:
+            if file_lines:
+                if file_lines[-1].strip() != tag:  # have only one entry
+                    handle.write(f"{tag}\n")
+            else:
+                handle.write(f"{tag}\n")
+
+
+def append_detection(text: str) -> None:
+    DETECT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with DETECT_FILE.open("a", encoding="utf-8") as handle:
+        handle.write(f"{text}\n")
 
 
 def set_system_prompt(prompt: str, *, reset_history: bool = False) -> None:
@@ -188,7 +211,9 @@ def launch_module(
     env: Optional[MutableMapping[str, str]] = None,
 ) -> subprocess.Popen:
     """Launch a module in a background process."""
-    return spawn_subprocess(python_module_args(module, *extra), cwd=cwd, new_session=new_session, env=env)
+    return spawn_subprocess(
+        python_module_args(module, *extra), cwd=cwd, new_session=new_session, env=env
+    )
 
 
 class TerminalSessionHandle:
@@ -259,7 +284,9 @@ def _macos_terminal_command(
             if value is not None:
                 exports[key] = value
 
-    python_cmd = " ".join(shlex.quote(arg) for arg in python_module_args(module, *extra))
+    python_cmd = " ".join(
+        shlex.quote(arg) for arg in python_module_args(module, *extra)
+    )
     shell_parts = [f"cd {shlex.quote(str(base_dir))}"]
     for key, value in exports.items():
         shell_parts.append(f"export {key}={shlex.quote(value)}")

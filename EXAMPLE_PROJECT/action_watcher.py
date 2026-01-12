@@ -11,6 +11,7 @@ from pathlib import Path
 from projects.utils import (
     ACTIONS_FILE,
     INBOX_FILE,
+    DETECT_FILE,
     append_inbox_line,
     ensure_runtime_files,
     set_system_prompt,
@@ -23,7 +24,7 @@ from .boot import (
     PROMPT_APPEND as PROMPT_APPEND,
 )
 
-from model_training.robo_recognition import robot as is_robot
+import model_training.robo_recognition as robo_state
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
@@ -35,10 +36,12 @@ def main() -> None:
     with (
         ACTIONS_FILE.open("r", encoding="utf-8") as actions,
         INBOX_FILE.open("r", encoding="utf-8") as inbox,
+        DETECT_FILE.open("r", encoding="utf-8") as detected,
     ):
         # Jump to the end so we only process new lines that arrive after startup.
         actions.seek(0, os.SEEK_END)
         inbox.seek(0, os.SEEK_END)
+        detected.seek(0, os.SEEK_END)
 
         # Track whether the door is currently locked so we know which persona to use.
         locked = True
@@ -59,7 +62,7 @@ def main() -> None:
         try:
             while True:
                 action_line = tail_line(actions)
-                if action_line and is_robot["detected"]:
+                if action_line:
                     if action_line == "NEUTRAL":
                         print("robot is neutral")
                         # Swap the assistant's persona and tell listeners what happened.
@@ -68,24 +71,6 @@ def main() -> None:
                         )
                         set_system_prompt(unlocked_prompt)
                         continue
-                    # if action_line == "DETECTED":
-                    #     print("robot appeared")
-                    #     locked = False
-                    #     # Swap the assistant's persona and tell listeners what happened.
-                    #     set_system_prompt(unlocked_prompt)
-                    #     append_inbox_line(
-                    #         "A: [The robot appeared in the frame, the speech of the museum guide changed, see current system message]"
-                    #     )
-                    #     continue
-                    # if action_line == "NOT DETECTED":
-                    #     print("robot disappeared")
-                    #     locked = True
-                    #     # Restore the locked persona and log the change for the user.
-                    #     set_system_prompt(locked_prompt)
-                    #     append_inbox_line(
-                    #         "A: [The robot has not appeared in the frame, the speech of the museum guide changed, see current system message]"
-                    #     )
-                    #     continue
                     if action_line == "EEPY":
                         print("robot is asleep")
                         EEPY_PROMPT = "The famous robo plush is now asleep, encourage everyone to speak in a quiet manner. You should also speak quietly from this point on, until the robot wakes up."

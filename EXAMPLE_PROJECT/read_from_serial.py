@@ -6,7 +6,7 @@ from projects import append_action
 
 
 def main() -> None:
-    serial_port_no = 14340
+    serial_port_no = 14440
     SERIAL_PORT = f"/dev/cu.wchusbserial{serial_port_no}"
 
     BAUD_RATE = 115200  # must match the ESP baud rate
