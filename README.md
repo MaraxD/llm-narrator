@@ -14,7 +14,7 @@ This project is an extension of Robo plush toy. I have added a llm-narrator acti
 ## MediaPipe custom model training & object detection 
 For this idea i wanted to have my own custom data set in order for the robot to be detected by a camera. For this i took 130 pictures of my plush robot (some of them were mirrored), and labeled them using [Label Studio](https://labelstud.io/guide/install). I then exported everything as **Pascal VOC XML**.
 
-You will then need to split some the data. 80% of the data will be used for training, 10% for testing and the rest of 10% for validation. After the split, you will need to put the selected images under the folder `train` and the rest under `validate`. The idea of validation is to show the model new data that has not been in the training phase so as to see how well the model recognizes the object(s).
+You will then need to split some of the data. 80% of the data will be used for training, 10% for testing and the rest of 10% for validation. After the split, you will need to put the selected images under the folder `model_training/robo_plush/train` and the rest under `model_training/robo_plush/validate`. The idea of validation is to show the model new data that has not been in the training phase in order to see how well the model recognizes the object(s).
 
 After the model has been generated (`robo_plush.tflite`), you can start testing the real time object detection by running `model_training/robo_recognition`.
 
