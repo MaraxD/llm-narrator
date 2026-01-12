@@ -1,13 +1,5 @@
-# llm-actor
-
-This project packages a thin Python CLI around [Pipecat](https://docs.pipecat.ai/) to deliver a real-time audio loop using Deepgram Flux speech-to-text, Gemini 2.5 Flash streaming text generation, and Deepgram Aura-2 text-to-speech. External automation hooks are exposed via append-only files under `runtime/`.
-
-## Features
-
-* Deepgram Flux STT → Gemini 2.5 Flash → Deepgram Aura-2 TTS pipeline, fully streaming.
-* File-based automation using append-only `runtime/inbox.txt`, `runtime/actions.txt`, and `runtime/params_inbox.ndjson`.
-* Turn-level transcript and event logging per session.
-* Runtime parameter application between turns (LLM, STT, TTS, history operations).
+# LLM narrator
+This project is an extension of Robo plush toy. I have added a llm-narrator acting as a museum guide, that describes my crocheted robot. This project uses a custom trained model with MediaPipe's real time object detection, and Jan Zuiderveld's llm actor. The narrator reacts based on robot's presence and emotions.
 
 ## Prerequisites
 
@@ -17,6 +9,24 @@ This project packages a thin Python CLI around [Pipecat](https://docs.pipecat.ai
   * macOS: `brew install portaudio`
   * Ubuntu/Debian: `sudo apt install portaudio19-dev`
   * Windows: the bundled `sounddevice` wheel ships PortAudio automatically. However, Windows users need to install [ffmpeg](https://phoenixnap.com/kb/ffmpeg-windows) for audio playback.
+
+
+## MediaPipe custom model training & object detection 
+For this idea i wanted to have my own custom data set in order for the robot to be detected by a camera. For this i took 130 pictures of my plush robot (some of them were mirrored), and labeled them using [Label Studio](https://labelstud.io/guide/install). I then exported everything as **Pascal VOC XML**.
+
+You will then need to split some the data. 80% of the data will be used for training, 10% for testing and the rest of 10% for validation. After the split, you will need to put the selected images under the folder `train` and the rest under `validate`. The idea of validation is to show the model new data that has not been in the training phase so as to see how well the model recognizes the object(s).
+
+After the model has been generated (`robo_plush.tflite`), you can start testing the real time object detection by running `model_training/robo_recognition`.
+
+## LLM actor (Jan Zuiderveld)
+This project packages a thin Python CLI around [Pipecat](https://docs.pipecat.ai/) to deliver a real-time audio loop using Deepgram Flux speech-to-text, Gemini 2.5 Flash streaming text generation, and Deepgram Aura-2 text-to-speech. External automation hooks are exposed via append-only files under `runtime/`.
+
+## Features
+
+* Deepgram Flux STT → Gemini 2.5 Flash → Deepgram Aura-2 TTS pipeline, fully streaming.
+* File-based automation using append-only `runtime/inbox.txt`, `runtime/actions.txt`, and `runtime/params_inbox.ndjson`.
+* Turn-level transcript and event logging per session.
+* Runtime parameter application between turns (LLM, STT, TTS, history operations).
 
 ## Quickstart
 
@@ -31,8 +41,11 @@ Follow these steps to run the door project end-to-end:
    cd llm_actor
    python -m venv .venv # make sure to use python3.10+ (use python -V to check)
    # if you get "command not found: python" type python3 instead of python
+   
    source .venv/bin/activate # for Mac or Linux
+   
    .venv\Scripts\activate # for Windows
+   
    python -m pip install --upgrade pip 
    pip install -e .
    ```
@@ -63,7 +76,7 @@ Follow these steps to run the door project end-to-end:
 
 When the project is running, a terminal window running `inbox_writer.py` prompts you to press Enter to simulate “someone approaches the door.” The action watcher listens for `<UNLOCK>` / `<LOCK>` directives given by the persona and keeps the persona aligned with the door state.
 
-### Door Project Files
+### Project Files
 
 - `EXAMPLE_PROJECT/boot.py`: Coordinates startup, clears prior transcripts, seeds the locked persona, and spins up the helper processes. Adjust the `locked_config` and `unlocked_config` blocks to experiment with different prompts or voices.
 - `EXAMPLE_PROJECT/action_watcher.py`: Monitors `runtime/actions.txt` for `<UNLOCK>` / `<LOCK>` cues, keeps `runtime/inbox.txt` tidy, and flips between the locked and unlocked personalities.
