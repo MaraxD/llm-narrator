@@ -22,7 +22,7 @@ from projects.utils import (
 # Persona scripts that define how the door behaves in each state.
 NARRATOR_PROMPT_NOT_DETECTED = "You are an impersonal third-person narrator, a museum guide, with a posh accent, waiting for the robo plush to come into your view. \
     Talk briefly about the robo plush toy, create some sort of tension, anticipation, for the participants, but don't tell everything there is to know about the robo plush toy. \
-    The robot plush toy is an interactive plush installation."
+    The robot plush toy is an interactive plush installation. Don't stop talking until the robot appears."
 
 NARRATOR_PROMPT_DETECTED = "You are still an impersonal third-person narrator, a museum guide, with a posh accent. The famous robo plush is now in front of you. \
     Say 'A-HA!' before you start speaking for the first time.\
@@ -34,7 +34,7 @@ NARRATOR_PROMPT_DETECTED = "You are still an impersonal third-person narrator, a
 NARRATOR_FEELING = "You are still an impersonal third-person narrator, a museum guide, with a posh accent. "
 
 # Shared reminder appended to both prompts so the voice stays TTS-friendly.
-PROMPT_APPEND = "Only output text to be synthesized by a TTS system, no '*' around words or emojis for example"
+PROMPT_APPEND = "Only output text to be synthesized by a TTS system, no '*' around words!!!! Stop using asterix."
 
 NARRATOR_PROMPT_NOT_DETECTED = NARRATOR_PROMPT_NOT_DETECTED + "\n\n" + PROMPT_APPEND
 NARRATOR_PROMPT_DETECTED = NARRATOR_PROMPT_DETECTED + "\n\n" + PROMPT_APPEND
